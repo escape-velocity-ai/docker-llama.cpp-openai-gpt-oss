@@ -1,0 +1,5 @@
+
+{
+  "name": "Llama.cpp GGUF Runner",
+  "description": "A Dockerized environment to download, convert, and run Hugging Face models in GGUF format using llama.cpp with NVIDIA CUDA acceleration. The container sets up the environment, converts a specified model, and starts the llama.cpp server."
+}

@@ -9,7 +9,7 @@ from pathlib import Path
 # Read environment variables
 HF_MODEL_ID = os.getenv("HF_MODEL_ID")
 MODEL_PATH = os.getenv("MODEL_PATH", "/model-store")
-QUANTIZATION = os.getenv("QUANTIZATION", "q4_k_m")
+QUANTIZATION = os.getenv("QUANTIZATION", "f16")
 LLAMA_CPP_PATH = "/app/llama.cpp"
 LLAMA_SERVER_PATH = os.path.join(LLAMA_CPP_PATH, "build", "bin", "server")
 
@@ -101,10 +101,10 @@ def run_llama_server(model_path: Path):
     command = [
         LLAMA_SERVER_PATH,
         "-m", str(model_path),
-        "-c", "4096",
-        "--host", "0.0.0.0",
-        "--port", "8080",
-        "-ngl", "99" # Offload all layers to GPU
+        "-ctx-size", "32768",
+        "-jinja",
+        "-ub", "4096", "-b", "4096", "--n-cpu-moe", "32",
+        "--chat-template-file", "models/templates/openai-gpt-oss-120b.jinija"
     ]
 
     print(f"Executing command: {' '.join(command)}")

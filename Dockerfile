@@ -35,12 +35,14 @@ ENV LD_LIBRARY_PATH="/usr/local/cuda-12.5/lib64:${LD_LIBRARY_PATH}"
 WORKDIR /app
 RUN git clone https://github.com/ggml-org/llama.cpp.git
 WORKDIR /app/llama.cpp
+# Apparently we need the libcurl libs
+RUN apt-get install libcurl4-openssl-dev
 # Create and enter build directory
 RUN mkdir build && cd build && \
     # Configure cmake to build with CUDA support and for portability (non-native)
-    cmake .. -DLLAMA_CUBLAS=ON -DGGML_NATIVE=OFF && \
+    cmake -B build -DLLAMA_CUBLAS=ON -DGGML_NATIVE=OFF && \
     # Build the project
-    cmake --build . --config Release
+    cmake --build --config Release
 
 # 4. Copy application scripts
 WORKDIR /app
@@ -53,8 +55,8 @@ RUN chmod +x /app/run.sh
 ENV HF_MODEL_ID="unsloth/mistral-7b-v0.1-bnb-4bit"
 # Path to store the converted GGUF model and venv. MUST be a mounted volume.
 ENV MODEL_PATH="/model-store"
-# Quantization type for GGUF conversion. Default is q4_k_m.
-ENV QUANTIZATION="q4_k_m"
+# Quantization type for GGUF conversion. Default is f16.
+ENV QUANTIZATION="f16"
 
 # Expose the port for the llama.cpp server
 EXPOSE 8080

@@ -11,7 +11,7 @@ HF_MODEL_ID = os.getenv("HF_MODEL_ID")
 MODEL_PATH = os.getenv("MODEL_PATH", "/model-store")
 QUANTIZATION = os.getenv("QUANTIZATION", "f16")
 LLAMA_CPP_PATH = "/app/llama.cpp"
-LLAMA_SERVER_PATH = os.path.join(LLAMA_CPP_PATH, "build", "bin", "server")
+LLAMA_SERVER_PATH = os.path.join(LLAMA_CPP_PATH, "build", "bin", "llama-server")
 
 def main():
     """

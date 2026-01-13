@@ -1,6 +1,10 @@
 # docker-llama.cpp-openai-gpt-oss
 A general docker container for running openai gpt oss models using llama.cpp
 
+## Running on GCP Cloud Run
+
+For detailed instructions on how to deploy this service on Google Cloud Run, see the [GCP Cloud Run documentation](RUN-ON-GCP.md).
+
 ## Testing the service
 
 This repository includes a python script to test that the service is running correctly. The script will send requests to the service and print the response.

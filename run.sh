@@ -1,4 +1,3 @@
-
 #!/bin/bash
 set -e
 
@@ -10,31 +9,40 @@ if [ -z "$MODEL_PATH" ] || [ ! -d "$MODEL_PATH" ]; then
   exit 1
 fi
 
-# 2. Define and create the virtual environment inside the mounted volume
-VENV_PATH="$MODEL_PATH/venv"
-
-if [ ! -d "$VENV_PATH" ]; then
-  echo "Creating Python virtual environment in $VENV_PATH..."
-  python3 -m venv "$VENV_PATH"
+if [ -z "$GGUF_MODEL_PATH" ]; then
+    echo "Error: GGUF_MODEL_PATH environment variable is not set." >&2
+    exit 1
 fi
 
-# 3. Activate venv and install/verify Python dependencies
-echo "Activating virtual environment..."
-source "$VENV_PATH/bin/activate"
+if [ -z "$API_KEY" ]; then
+    echo "Error: API_KEY environment variable is not set." >&2
+    exit 1
+fi
 
-echo "Installing/verifying Python dependencies..."
-pip install --no-cache-dir \
-    "unsloth[cu121-strict] @ git+https://github.com/unslothai/unsloth.git" \
-    huggingface_hub \
-    transformers \
-    torch
+FULL_MODEL_PATH="$MODEL_PATH/$GGUF_MODEL_PATH"
 
-echo "Install NVidia CUDA toolkit"
-RUN wget https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/cuda-keyring_1.1-1_all.deb
-RUN dpkg -i cuda-keyring_1.1-1_all.deb
-RUN apt-get update
-RUN apt-get -y install cuda-toolkit-13-1
+if [ ! -f "$FULL_MODEL_PATH" ]; then
+    echo "Error: Model file not found at $FULL_MODEL_PATH" >&2
+    exit 1
+fi
 
-# 4. Execute the main Python script
-echo "Starting model setup and server execution..."
-python /app/scripts/setup_and_run.py
+LLAMA_SERVER_PATH="/app/llama.cpp/build/bin/llama-server"
+CERT_PATH="/app/certs"
+KEY_PATH="$CERT_PATH/key.pem"
+CERT_BUNDLE="$CERT_PATH/cert-bundle.pem"
+
+
+echo "Starting llama.cpp server with model: $FULL_MODEL_PATH"
+
+exec "$LLAMA_SERVER_PATH" \
+    -m "$FULL_MODEL_PATH" \
+    -ctx-size 32768 \
+    -jinja \
+    -ub 4096 -b 4096 \
+    --chat-template-file "models/templates/openai-gpt-oss-120b.jinja" \
+    --no-webui \
+    --host "0.0.0.0" \
+    --port "443" \
+    --ssl-cert-file "$CERT_BUNDLE" \
+    --ssl-key-file "$KEY_PATH" \
+    --api-key "$API_KEY"

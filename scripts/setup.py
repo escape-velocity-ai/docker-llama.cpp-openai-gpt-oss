@@ -3,6 +3,7 @@ import os
 import sys
 import shutil
 from pathlib import Path
+## Pip ignores this in the requirements - so install manually: pip install google-cloud-storage
 from google.cloud import storage
 
 # --- Configuration ---

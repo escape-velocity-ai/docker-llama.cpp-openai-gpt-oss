@@ -25,7 +25,6 @@ REGION="europe-west4"
 REGISTRY="llama-cpp"
 
 # The name of the image you are building.
-# TODO: Change 'my-app' to your desired image name.
 IMAGE_NAME="docker-llama.cpp-openai-gpt-oss"
 
 # The tag for your image. 'latest' is a common default.

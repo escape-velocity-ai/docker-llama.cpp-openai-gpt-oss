@@ -67,7 +67,7 @@ def main():
 
     try:
         response = requests.post(
-            f"{service_url}/completion",
+            f"{service_url}/v1/completions",
             headers=headers,
             json=data,
             stream=True,

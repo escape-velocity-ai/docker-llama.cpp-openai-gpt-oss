@@ -170,7 +170,7 @@ dmypy.json
 
 # pytype static type analyzer
 .pytype/
-
+certs/
 # Cython debug symbols
 cython_debug/
 

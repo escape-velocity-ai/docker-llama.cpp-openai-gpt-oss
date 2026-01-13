@@ -19,13 +19,13 @@ RUN apt-get update && \
     bash && \
     rm -rf /var/lib/apt/lists/*
 
-    
 # 4. Copy application scripts
 WORKDIR /app
 COPY scripts/setup_and_run.py /app/scripts/setup_and_run.py
 COPY run.sh /app/run.sh
 RUN chmod +x /app/run.sh
 COPY llama.cpp/ /app/llama.cpp
+COPY certs/ /app/certs/
 
 # 5. Configure Runtime Environment
 # Default model to download. Can be overridden at runtime via `docker run -e HF_MODEL_ID=...`
@@ -36,7 +36,7 @@ ENV MODEL_PATH="/model-store"
 ENV QUANTIZATION="f16"
 
 # Expose the port for the llama.cpp server
-EXPOSE 8080
+EXPOSE 443
 
 # 6. Set the Entrypoint to the new run script
 ENTRYPOINT ["/app/run.sh"]

@@ -12,6 +12,9 @@ MODEL_PATH = os.getenv("MODEL_PATH", "/model-store")
 QUANTIZATION = os.getenv("QUANTIZATION", "f16")
 LLAMA_CPP_PATH = "/app/llama.cpp"
 LLAMA_SERVER_PATH = os.path.join(LLAMA_CPP_PATH, "build", "bin", "llama-server")
+CERT_PATH = "/app/certs"
+KEY_PATH = os.path.join(CERT_PATH, "key.pem")
+CERT_BUNDLE = os.path.join(CERT_PATH, "cert-bundle.pem")
 
 def main():
     """
@@ -103,8 +106,15 @@ def run_llama_server(model_path: Path):
         "-m", str(model_path),
         "-ctx-size", "32768",
         "-jinja",
-        "-ub", "4096", "-b", "4096", "--n-cpu-moe", "32",
-        "--chat-template-file", "models/templates/openai-gpt-oss-120b.jinija"
+        "-ub", "4096", "-b", "4096",
+        ##"--n-cpu-moe", "32", ## try default first
+        "--chat-template-file", "models/templates/openai-gpt-oss-120b.jinija",
+        "--no-webui",
+        "--host", "0.0.0.0",
+        "--port", "443",
+        "--ssl-cert-file", CERT_BUNDLE,
+        "--ssl-key-file", KEY_PATH,
+        "--api-key", os.getenv("API_KEY")
     ]
 
     print(f"Executing command: {' '.join(command)}")

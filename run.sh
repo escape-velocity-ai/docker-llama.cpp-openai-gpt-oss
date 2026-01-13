@@ -29,6 +29,12 @@ pip install --no-cache-dir \
     transformers \
     torch
 
+echo "Install NVidia CUDA toolkit"
+RUN wget https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/cuda-keyring_1.1-1_all.deb
+RUN dpkg -i cuda-keyring_1.1-1_all.deb
+RUN apt-get update
+RUN apt-get -y install cuda-toolkit-13-1
+
 # 4. Execute the main Python script
 echo "Starting model setup and server execution..."
 python /app/scripts/setup_and_run.py

@@ -29,7 +29,7 @@ REGISTRY="llama-cpp"
 IMAGE_NAME="docker-llama.cpp-openai-gpt-oss"
 
 # The tag for your image. 'latest' is a common default.
-TAG="v0.1"
+TAG="v0.01.02"
 # --- End of Configuration ---
 
 # 1. Get the Google Cloud Project ID from the gcloud config.

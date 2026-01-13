@@ -1,0 +1,22 @@
+[
+    {
+        "type": "function",
+        "function": {
+            "name": "general_data_search",
+            "description": "Performs a general data search given a set of search terms.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "search_terms": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "A set of search terms."
+                    }
+                },
+                "required": ["search_terms"]
+            }
+        }
+    }
+]

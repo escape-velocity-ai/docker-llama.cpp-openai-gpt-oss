@@ -2,7 +2,7 @@ import os
 import json
 import tempfile
 import subprocess
-from openai import OpenAI
+import requests
 
 
 def get_prompt_from_user():
@@ -42,11 +42,6 @@ def main():
         print("Error: Could not decode tools.json.")
         return
 
-    client = OpenAI(
-        base_url=service_url,
-        api_key=api_key,
-    )
-
     prompt = get_prompt_from_user()
 
     if not prompt.strip():
@@ -57,31 +52,67 @@ def main():
 
     print("Sending request to the service...")
 
-    stream = client.chat.completions.create(
-        model=model_name,
-        messages=messages,
-        tools=tools,
-        tool_choice="auto",
-        stream=True,
-    )
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {api_key}",
+    }
+
+    data = {
+        "model": model_name,
+        "messages": messages,
+        "tools": tools,
+        "tool_choice": "auto",
+        "stream": True,
+    }
+
+    try:
+        response = requests.post(
+            f"{service_url}/completion",
+            headers=headers,
+            json=data,
+            stream=True,
+        )
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        print(f"Error sending request: {e}")
+        return
 
     tool_calls = []
-    for chunk in stream:
-        delta = chunk.choices[0].delta
-        if delta.content:
-            print(delta.content, end="", flush=True)
-        if delta.tool_calls:
-            for tool_call_chunk in delta.tool_calls:
-                if len(tool_calls) <= tool_call_chunk.index:
-                    tool_calls.append({"id": "", "type": "function", "function": {"name": "", "arguments": ""}})
+    for line in response.iter_lines():
+        if not line:
+            continue
+        line = line.decode("utf-8")
+        if not line.startswith("data: "):
+            continue
 
-                tc = tool_calls[tool_call_chunk.index]
-                if tool_call_chunk.id:
-                    tc["id"] += tool_call_chunk.id
-                if tool_call_chunk.function.name:
-                    tc["function"]["name"] += tool_call_chunk.function.name
-                if tool_call_chunk.function.arguments:
-                    tc["function"]["arguments"] += tool_call_chunk.function.arguments
+        json_str = line[len("data: "):]
+        if json_str == "[DONE]":
+            break
+
+        try:
+            chunk = json.loads(json_str)
+            delta = chunk.get("choices", [{}])[0].get("delta", {})
+            content = delta.get("content")
+            if content:
+                print(content, end="", flush=True)
+
+            if "tool_calls" in delta and delta["tool_calls"]:
+                for tool_call_chunk in delta["tool_calls"]:
+                    index = tool_call_chunk["index"]
+                    if len(tool_calls) <= index:
+                        tool_calls.append({"id": "", "type": "function", "function": {"name": "", "arguments": ""}})
+
+                    tc = tool_calls[index]
+                    if "id" in tool_call_chunk and tool_call_chunk["id"]:
+                        tc["id"] += tool_call_chunk["id"]
+                    if "function" in tool_call_chunk:
+                        if "name" in tool_call_chunk["function"] and tool_call_chunk["function"]["name"]:
+                            tc["function"]["name"] += tool_call_chunk["function"]["name"]
+                        if "arguments" in tool_call_chunk["function"] and tool_call_chunk["function"]["arguments"]:
+                            tc["function"]["arguments"] += tool_call_chunk["function"]["arguments"]
+        except json.JSONDecodeError:
+            print(f"\nError decoding JSON: {json_str}")
+            continue
 
     if tool_calls:
         print("\n\nTool calls:")

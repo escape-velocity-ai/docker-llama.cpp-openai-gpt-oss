@@ -1,5 +1,7 @@
 # Running on GCP Cloud Run
 
+*** Note, this is still experimental ***
+
 This document provides a step-by-step guide to deploying the service on Google Cloud Run.
 
 ## 1. Create a Google Cloud Storage Bucket
@@ -9,7 +11,6 @@ First, you need a Google Cloud Storage bucket to store your converted model file
 1.  **Authenticate with GCP:** Make sure you have the `gcloud` CLI installed and authenticated. You can authenticate by running:
     ```bash
     gcloud auth login
-    gcloud auth application-default login
     ```
 
 2.  **Create a Bucket:** Follow the official Google Cloud documentation to create a new storage bucket.
@@ -22,6 +23,7 @@ The `scripts/setup.py` script is used to download a model from Hugging Face, con
 
 1.  **Install Dependencies:**
     ```bash
+    cd scripts
     pip install -r scripts/requirements.txt
     ```
 

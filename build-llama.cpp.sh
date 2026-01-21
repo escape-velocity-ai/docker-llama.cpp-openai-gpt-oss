@@ -27,4 +27,4 @@ cd llama.cpp
 # For arch details see llama.cpp/ggml/src/ggml-cuda/CMakeLists.txt
 cmake -B build -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc -DGGML_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES="89" && \
     # Build the project
-    cmake --build build --config Release
+    cmake --build build --config Release --clean-first --target llama-server
